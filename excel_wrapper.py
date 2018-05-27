@@ -150,7 +150,7 @@ def check_eval(operator_1, operator_2, symbol):
     operator_1 = ''.join([i for i in operator_1 if not i.isdigit()])
     operator_2 = ''.join([i for i in operator_2 if not i.isdigit( )])
     if operator_1 and operator_2:
-        return "{}{}{}".format(operator_1, symbol, operator_2)
+        return "{}{}{}".format(operator_2, symbol, operator_1)
 
 
 def eval_postfix(df, postfix_stack, target_column):
@@ -168,7 +168,9 @@ def eval_postfix(df, postfix_stack, target_column):
             if eval_value:
                 expression = "{}=".format(target_column) + eval_value
                 columns = eval_value.split(symbol)
-                print('Expression', df[columns[0]].dtype, df[columns[1]].dtype)
+                for column in columns:
+                    if df[column].dtype == 'object':
+                        df[column] = df[column].apply(pd.to_numeric, errors='coerce')
                 df = df.eval(expression, engine='python')
                 temp_list.append(target_column)
             else:
@@ -216,6 +218,7 @@ def excel_functions(df, function, column, row=None):
     df = df.sort_index( )  # sorting by index
     df = df.reset_index(drop=True)
     df.index += 1
+    df['id'] = range(1, len(df) + 1)
     return df.to_html()
 
 
@@ -225,10 +228,10 @@ df = pd.read_csv(
 )
 
 df = pre_process_df(df)
-df = add_column_to_df(df, column_name='Total')
+df = add_column_to_df(df, column_name='Profit')
 processed_df = excel_functions(
     df=df,
-    function='=( ( ( G2 + H2 ) / 1 ) + G2 )',
+    function='=( ( ( G2 - H2 ) / G2 ) * 100 )',
     column="I",
     row=None
 )

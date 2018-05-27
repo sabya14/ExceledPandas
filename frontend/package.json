@@ -13,6 +13,7 @@
   "dependencies": {
     "element-ui": "^2.3.9",
     "vue": "^2.5.2",
+    "vue-editortable": "^1.1.5",
     "vue-router": "^3.0.1"
   },
   "devDependencies": {
